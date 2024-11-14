@@ -540,11 +540,13 @@ void insert(rc_insert *s_insert) {
 	memset(&objeto, 0, sizeof(struct fs_objects));
 	char  flag=0;
 
+  int columnsExist = allColumnsExists(s_insert, tabela);
+
 	abreTabela(s_insert->objName, &objeto, &tabela->esquema); //retorna o esquema para a insere valor
 	strcpylower(tabela->nome, s_insert->objName);
 
 	if(s_insert->columnName != NULL){
-		if (allColumnsExists(s_insert, tabela)){
+		if (columnsExist){
 			for (esquema = tabela->esquema; esquema != NULL; esquema = esquema->next){
 				if(typesCompatible(esquema->tipo,getInsertedType(s_insert, esquema->nome, tabela))){
 					colunas = insereValor(tabela, colunas, esquema->nome, getInsertedValue(s_insert, esquema->nome, tabela));
@@ -581,7 +583,9 @@ void insert(rc_insert *s_insert) {
 			}
 		}
     else {
-      printf("ERROR: INSERT has more expressions than target columns.\n");
+      if (columnsExist) 
+        printf("ERROR: INSERT has more expressions than target columns.\n");
+
 		  flag = 1;
 		}
 	}
